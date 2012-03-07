@@ -1,7 +1,7 @@
 package darts
 
 import (
-//    "os"
+//    "fmt"
     )
 
 type key_type byte
@@ -34,7 +34,7 @@ func Build(key [][]key_type, value []int) Darts{
 
     d.key = key
     d.value = value
-    d.resize(20)
+    d.resize(512)
 
     d.array[0].base = 1
     d.nextCheckPos = 0
@@ -52,10 +52,19 @@ func Build(key [][]key_type, value []int) Darts{
 	d.resize(d.size)
     }
 
+    if d.err < 0 {
+	panic("Build error")
+    }
     return d.array
 }
 
 func (d *dartsBuild) resize(newSize int) {
+    if newSize > cap (d.used) {
+	d.used = make([]bool, newSize)
+    }else{
+	d.used = d.used[:newSize]
+    }
+
     if newSize > cap (d.array) {
 	d.array = make(Darts, newSize)
     }else{
@@ -79,10 +88,11 @@ func (d *dartsBuild) fetch(parent node) []node{
 
 	var cur key_type = 0
 	if len(d.key[i]) != parent.depth {
-	    cur = tmp[i] + 1
+	    cur = tmp[parent.depth] + 1
 	}
 
 	if prev > cur {
+	    panic("fetch error 1")
 	    d.err = -3
 	    return siblings[0:0]
 	}
@@ -117,6 +127,7 @@ func max(a, b int) int{
 }
 func (d *dartsBuild) insert(siblings []node) int{
     if d.err < 0 {
+	panic("insert error")
 	return 0
     }
 
@@ -146,7 +157,7 @@ next:
 
 	begin = pos - int(siblings[0].code)
 	if len(d.array) <= (begin + int(siblings[len(siblings) - 1].code)){
-	    d.resize(len(d.array) * 105/100) //overflow
+	    d.resize(len(d.array) * 105/100) //*105/100 may overflow
 	}
 
 	if d.used[begin] {
@@ -177,6 +188,7 @@ next:
 	    d.array[begin + int(siblings[i].code)].base = -d.value[siblings[i].left] - 1
 	    if -d.value[siblings[i].left]-1 >= 0 {
 		d.err = -2
+		panic("insert error 1")
 		return 0
 	    }
 	}else{
@@ -186,4 +198,25 @@ next:
     }
 
     return begin
+}
+func (d Darts) ExactMatchSearch(key []key_type, nodePos int) bool{
+    b := d[nodePos].base
+    var p int
+
+    for i := 0; i < len(key); i++ {
+	p = b + int(key[i]) + 1
+	if b == d[p].check {
+	    b = d[p].base
+	}else{
+	    return false
+	}
+    }
+
+    p = b
+    n := d[p].base
+    if b == d[p].check && n < 0 {
+	return true
+    }
+
+    return false
 }

@@ -5,16 +5,16 @@ import(
     )
 
 type buildTest struct{
-    inKey [][]key_type
+    inKey [][]byte
     inValue []int
     out Darts
 }
 
 var buildTests = []buildTest{
     buildTest{
-	[][]key_type{[]key_type("不学无术"),[]key_type("真功")},
+	[][]byte{[]byte("不学无术"),[]byte("真功")},
 	[]int{1,1},
-	Darts{unit{3,5}, unit{4,6}}},
+	Darts{Unit{3,5}, Unit{4,6}}},
 }
 
 func testBuild(t *testing.T) {
@@ -27,27 +27,27 @@ func testBuild(t *testing.T) {
     }
 }
 type exactMatchSearchTest struct{
-    in []key_type
+    in []byte
     out bool
 }
 
 var exactMatchSearchTests = []exactMatchSearchTest{
     exactMatchSearchTest{
-	[]key_type("不学无术"),
+	[]byte("不学无术"),
 	true},
     exactMatchSearchTest{
-	[]key_type("真功"),
+	[]byte("真功"),
 	true},
     exactMatchSearchTest{
-	[]key_type("历史"),
+	[]byte("历史"),
 	false},
     exactMatchSearchTest{
-	[]key_type("Adidas"),
-	false},
+	[]byte("Adidas"),
+	true},
 }
 
 func TestExactMatchSearch(t *testing.T) {
-    d := Build([][]key_type{[]key_type("不学无术"),[]key_type("真功")}, []int{1,1})
+    d := Build([][]byte{[]byte("Adidas"),[]byte("不学无术"),[]byte("真功")}, []int{1,1,1})
     for _, dt := range exactMatchSearchTests {
 	v := d.ExactMatchSearch(dt.in, 0)
 	if v != dt.out {

@@ -1,42 +1,42 @@
 package darts
 
 import (
-//    "fmt"
+    "fmt"
     )
 
-type key_type byte
+//type Key_type byte
 
 type node struct{
-    code key_type
+    code byte /*Key_type*/
     depth, left, right int
 }
 
-type unit struct{
-    base int
-    check int
+type Unit struct{
+    Base int
+    Check int
 }
 
-type Darts []unit
+type Darts []Unit
 
 type dartsBuild struct{
     array	Darts
     used	[]bool
     size	int
     keySize	int
-    key		[][]key_type
+    key		[][]byte /*Key_type*/
     value	[]int
     nextCheckPos  int
     err		int
 }
 
-func Build(key [][]key_type, value []int) Darts{
+func Build(key [][]byte /*Key_type*/, value []int) Darts{
     var d = new(dartsBuild)
 
     d.key = key
     d.value = value
     d.resize(512)
 
-    d.array[0].base = 1
+    d.array[0].Base = 1
     d.nextCheckPos = 0
 
     var rootNode node
@@ -47,10 +47,12 @@ func Build(key [][]key_type, value []int) Darts{
     siblings := d.fetch(rootNode)
     d.insert(siblings)
 
+/*
     d.size += (1 << 8 * d.keySize) + 1
     if d.size > len(d.array) {
 	d.resize(d.size)
     }
+    */
 
     if d.err < 0 {
 	panic("Build error")
@@ -59,16 +61,12 @@ func Build(key [][]key_type, value []int) Darts{
 }
 
 func (d *dartsBuild) resize(newSize int) {
-    if newSize > cap (d.used) {
-	d.used = make([]bool, newSize)
-    }else{
-	d.used = d.used[:newSize]
-    }
-
-    if newSize > cap (d.array) {
-	d.array = make(Darts, newSize)
+    if newSize > cap(d.array) {
+	d.array = append(d.array, make(Darts, (newSize - len(d.array)))...)
+	d.used = append(d.used, make([]bool, (newSize - len(d.used)))...)
     }else{
 	d.array = d.array[:newSize]
+	d.used = d.used[:newSize]
     }
 }
 
@@ -77,7 +75,7 @@ func (d *dartsBuild) fetch(parent node) []node{
     if d.err < 0 {
 	return siblings[0:0]
     }
-    var prev key_type = 0
+    var prev byte /*Key_type*/ = 0
 
     for i := parent.left; i < parent.right; i++ {
 	if len(d.key[i]) < parent.depth {
@@ -86,12 +84,14 @@ func (d *dartsBuild) fetch(parent node) []node{
 
 	tmp := d.key[i]
 
-	var cur key_type = 0
+	var cur byte /*Key_type*/ = 0
 	if len(d.key[i]) != parent.depth {
 	    cur = tmp[parent.depth] + 1
 	}
 
 	if prev > cur {
+	    fmt.Println(prev, cur,i, parent.depth, string(d.key[i]))
+	    fmt.Println(d.key[i])
 	    panic("fetch error 1")
 	    d.err = -3
 	    return siblings[0:0]
@@ -147,7 +147,7 @@ next:
 	    d.resize(pos + 1)
 	}
 
-	if d.array[pos].check > 0 {
+	if d.array[pos].Check > 0 {
 	    nonZeroNum++
 	    continue
 	}else if !first {
@@ -157,7 +157,7 @@ next:
 
 	begin = pos - int(siblings[0].code)
 	if len(d.array) <= (begin + int(siblings[len(siblings) - 1].code)){
-	    d.resize(len(d.array) * 105/100) //*105/100 may overflow
+	    d.resize(begin + int(siblings[len(siblings) - 1].code) + 400)
 	}
 
 	if d.used[begin] {
@@ -165,27 +165,30 @@ next:
 	}
 
 	for i := 1; i < len(siblings); i++ {
-	    if 0 != d.array[begin + int(siblings[i].code)].check {
+	    if begin + int(siblings[i].code) >= len(d.array){
+		fmt.Println(len(d.array), begin + int(siblings[i].code), begin + int(siblings[len(siblings) - 1].code))
+	    }
+	    if 0 != d.array[begin + int(siblings[i].code)].Check {
 		goto next
 	    }
 	}
 	break
     }
 
-    if 1.0 * float32(nonZeroNum)/float32(pos - d.nextCheckPos + 1) >= 0.95{
+    if float32(nonZeroNum)/float32(pos - d.nextCheckPos + 1) >= 0.95{
 	d.nextCheckPos = pos
     }
     d.used[begin] = true
     d.size = max(d.size, begin + int(siblings[len(siblings) - 1].code) + 1)
 
     for i := 0; i < len(siblings); i++ {
-	d.array[begin + int(siblings[i].code)].check = begin
+	d.array[begin + int(siblings[i].code)].Check = begin
     }
 
     for i := 0; i < len(siblings); i++ {
 	newSiblings := d.fetch(siblings[i])
 	if len(newSiblings) == 0{
-	    d.array[begin + int(siblings[i].code)].base = -d.value[siblings[i].left] - 1
+	    d.array[begin + int(siblings[i].code)].Base = -d.value[siblings[i].left] - 1
 	    if -d.value[siblings[i].left]-1 >= 0 {
 		d.err = -2
 		panic("insert error 1")
@@ -193,28 +196,28 @@ next:
 	    }
 	}else{
 	    h := d.insert(newSiblings)
-	    d.array[begin + int(siblings[i].code)].base = h
+	    d.array[begin + int(siblings[i].code)].Base = h
 	}
     }
 
     return begin
 }
-func (d Darts) ExactMatchSearch(key []key_type, nodePos int) bool{
-    b := d[nodePos].base
+func (d Darts) ExactMatchSearch(key []byte /*Key_type*/, nodePos int) bool{
+    b := d[nodePos].Base
     var p int
 
     for i := 0; i < len(key); i++ {
 	p = b + int(key[i]) + 1
-	if b == d[p].check {
-	    b = d[p].base
+	if b == d[p].Check {
+	    b = d[p].Base
 	}else{
 	    return false
 	}
     }
 
     p = b
-    n := d[p].base
-    if b == d[p].check && n < 0 {
+    n := d[p].Base
+    if b == d[p].Check && n < 0 {
 	return true
     }
 

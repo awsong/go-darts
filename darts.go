@@ -4,10 +4,10 @@ import (
     "fmt"
     )
 
-//type Key_type byte
+//type Key_type rune
 
 type node struct{
-    code byte /*Key_type*/
+    code rune /*Key_type*/
     depth, left, right int
 }
 
@@ -23,13 +23,13 @@ type dartsBuild struct{
     used	[]bool
     size	int
     keySize	int
-    key		[][]byte /*Key_type*/
+    key		[][]rune /*Key_type*/
     value	[]int
     nextCheckPos  int
     err		int
 }
 
-func Build(key [][]byte /*Key_type*/, value []int) Darts{
+func Build(key [][]rune /*Key_type*/, value []int) Darts{
     var d = new(dartsBuild)
 
     d.key = key
@@ -75,7 +75,7 @@ func (d *dartsBuild) fetch(parent node) []node{
     if d.err < 0 {
 	return siblings[0:0]
     }
-    var prev byte /*Key_type*/ = 0
+    var prev rune /*Key_type*/ = 0
 
     for i := parent.left; i < parent.right; i++ {
 	if len(d.key[i]) < parent.depth {
@@ -84,13 +84,13 @@ func (d *dartsBuild) fetch(parent node) []node{
 
 	tmp := d.key[i]
 
-	var cur byte /*Key_type*/ = 0
+	var cur rune /*Key_type*/ = 0
 	if len(d.key[i]) != parent.depth {
 	    cur = tmp[parent.depth] + 1
 	}
 
 	if prev > cur {
-	    fmt.Println(prev, cur,i, parent.depth, string(d.key[i]))
+	    fmt.Println(prev, cur,i, parent.depth, d.key[i])
 	    fmt.Println(d.key[i])
 	    panic("fetch error 1")
 	    d.err = -3
@@ -202,7 +202,7 @@ next:
 
     return begin
 }
-func (d Darts) ExactMatchSearch(key []byte /*Key_type*/, nodePos int) bool{
+func (d Darts) ExactMatchSearch(key []rune /*Key_type*/, nodePos int) bool{
     b := d[nodePos].Base
     var p int
 

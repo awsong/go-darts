@@ -7,18 +7,19 @@ Darts can be used as simple hash dictionary. You can also do very fast Common Pr
 Reference
 ---------
 [What is Trie](http://en.wikipedia.org/wiki/Trie)
+
 [An Implementation of Double-Array Trie](http://linux.thai.net/~thep/datrie/datrie.html)
+
+TO DO list
+----------
+* Documentation/comments
+* Benchmark
 
 Switch from unicode to byte version
 ----------------------
 ```sh
 gofmt -tabs=false -tabwidth=4 -r='rune /*Key_type*/ -> byte /*Key_type*/' -w darts.go
 ```
-
-TO DO list
-----------
-* Documentation/comments
-* Benchmark
 
 Usage
 ---------
@@ -31,36 +32,38 @@ Each key occupies one line. The file should be utf-8 encoded
 #Code example (unicode version)
 ```sh
 package main
-import(
+
+import (
     "darts"
     "fmt"
 )
 
-func main(){
+func main() {
     ok, d := darts.Import("darts.txt", "darts.lib")
     if ok {
-	if d.ExactMatchSearch([]rune("考察队员",0) {
-	    fmt.Println("考察队员 is in dictionary")
-	}
+        if d.ExactMatchSearch([]rune("考察队员", 0)) {
+            fmt.Println("考察队员 is in dictionary")
+        }
     }
 }
 ```
 #Code example (byte version)
 ```sh
 package main
-import(
+
+import (
     "darts"
     "fmt"
 )
 
-func main(){
+func main() {
     ok, d := darts.Import("darts.txt", "darts.lib")
     if ok {
-	key := []byte("考察队员")
-	r := d.CommonPrefixSearch(key, 0) 
-	for i := 0; i < len(r); i++ {
-	    fmt.Println(string(key[:r[i].PrefixLen]))
-	}
+        key := []byte("考察队员")
+        r := d.CommonPrefixSearch(key, 0)
+        for i := 0; i < len(r); i++ {
+            fmt.Println(string(key[:r[i].PrefixLen]))
+        }
     }
 }
 ```

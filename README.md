@@ -1,4 +1,4 @@
-darts
+Darts
 =====
 This is a GO implementation of Double-ARray Trie System. It's a clone of the [C++ version](http://chasen.org/~taku/software/darts/) 
 
@@ -8,6 +8,17 @@ Reference
 ---------
 [What is Trie](http://en.wikipedia.org/wiki/Trie)
 [An Implementation of Double-Array Trie](http://linux.thai.net/~thep/datrie/datrie.html)
+
+Switch from unicode to byte version
+----------------------
+```sh
+gofmt -tabs=false -tabwidth=4 -r='rune /*Key_type*/ -> byte /*Key_type*/' -w darts.go
+```
+
+TO DO list
+----------
+* Documentation/comments
+* Benchmark
 
 Usage
 ---------
@@ -57,3 +68,7 @@ func main(){
 Performance
 -----------
 Using a 100K item dictionary, a simple search on eath key takes go map 46 ms, takes byte\_key version of darts 14 ms, and for unicode\_key version of darts 9.5 ms.
+
+LICENSE
+-----------
+Apache License 2.0

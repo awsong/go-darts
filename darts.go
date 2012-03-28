@@ -12,7 +12,7 @@ import (
     )
 
 type node struct{
-    code rune /*Key_type*/
+    code byte /*Key_type*/
     depth, left, right int
 }
 
@@ -40,13 +40,13 @@ type dartsBuild struct{
     used	[]bool
     size	int
     keySize	int
-    key		[][]rune /*Key_type*/
+    key		[][]byte /*Key_type*/
     freq	[]int
     nextCheckPos  int
     err		int
 }
 
-func Build(key [][]rune /*Key_type*/, freq []int) Darts{
+func Build(key [][]byte /*Key_type*/, freq []int) Darts{
     var d = new(dartsBuild)
 
     d.key = key
@@ -87,7 +87,7 @@ func (d *dartsBuild) fetch(parent node) []node{
     if d.err < 0 {
 	return siblings[0:0]
     }
-    var prev rune /*Key_type*/ = 0
+    var prev byte /*Key_type*/ = 0
 
     for i := parent.left; i < parent.right; i++ {
 	if len(d.key[i]) < parent.depth {
@@ -96,7 +96,7 @@ func (d *dartsBuild) fetch(parent node) []node{
 
 	tmp := d.key[i]
 
-	var cur rune /*Key_type*/ = 0
+	var cur byte /*Key_type*/ = 0
 	if len(d.key[i]) != parent.depth {
 	    cur = tmp[parent.depth] + 1
 	}
@@ -212,7 +212,7 @@ next:
 
     return begin
 }
-func (d Darts) UpdateThesaurus(keys [][]rune /*Key_type*/) {
+func (d Darts) UpdateThesaurus(keys [][]byte /*Key_type*/) {
 f0: for _, key := range keys{
 	wordLen := len(key)
 	if wordLen < 2 {
@@ -248,7 +248,7 @@ f0: for _, key := range keys{
 	}
     }
 }
-func (d Darts) ExactMatchSearch(key []rune /*Key_type*/, nodePos int) bool{
+func (d Darts) ExactMatchSearch(key []byte /*Key_type*/, nodePos int) bool{
     b := d.Base[nodePos]
     var p int
 
@@ -269,7 +269,7 @@ func (d Darts) ExactMatchSearch(key []rune /*Key_type*/, nodePos int) bool{
 
     return false
 }
-func (d Darts) CommonPrefixSearch(key []rune /*Key_type*/, nodePos int) (results []ResultPair){
+func (d Darts) CommonPrefixSearch(key []byte /*Key_type*/, nodePos int) (results []ResultPair){
     b := d.Base[nodePos]
     var p int
 
@@ -304,16 +304,16 @@ func Load(filename string) Darts{
     dec.Decode(&dict)
     return dict
 }
-type runeKey struct{
-    key []rune
+type dartsKey struct{
+    key []byte	/*Key_type*/
     value int
 }
-type runeKeySlice []runeKey
+type dartsKeySlice []dartsKey
 
-func (r runeKeySlice) Len() int{
+func (r dartsKeySlice) Len() int{
     return len(r)
 }
-func (r runeKeySlice) Less(i, j int) bool{
+func (r dartsKeySlice) Less(i, j int) bool{
     var l int
     if len(r[i].key) < len(r[j].key) {
 	l = len(r[i].key)
@@ -335,7 +335,7 @@ func (r runeKeySlice) Less(i, j int) bool{
     }
     return false
 }
-func (r runeKeySlice) Swap(i, j int){
+func (r dartsKeySlice) Swap(i, j int){
     r[i], r[j] = r[j], r[i]
 }
 
@@ -345,24 +345,24 @@ func Import(inFile, outFile string) (bool, Darts){
     ofile, _ := os.Create(outFile);
     defer ofile.Close();
 
-    runeKeys := make(runeKeySlice, 0, 130000)
+    dartsKeys := make(dartsKeySlice, 0, 130000)
     uniLineReader := bufio.NewReaderSize(unifile, 400);
     line, _, bufErr := uniLineReader.ReadLine();
     for nil == bufErr {
 	rst := strings.Split(string(line), "\t")
-	key := []rune(rst[0])
+	key := []byte(rst[0])
 	value,_ := strconv.Atoi(rst[1])
-	runeKeys = append(runeKeys, runeKey{key, value})
+	dartsKeys = append(dartsKeys, dartsKey{key, value})
 	line, _, bufErr = uniLineReader.ReadLine();
     }
-    sort.Sort(runeKeys)
+    sort.Sort(dartsKeys)
 
-    keys := make([][]rune, len(runeKeys))
-    values := make([]int, len(runeKeys))
+    keys := make([][]byte, len(dartsKeys))
+    values := make([]int, len(dartsKeys))
 
-    for i := 0; i < len(runeKeys); i++ {
-	keys[i] = runeKeys[i].key
-	values[i] = runeKeys[i].value
+    for i := 0; i < len(dartsKeys); i++ {
+	keys[i] = dartsKeys[i].key
+	values[i] = dartsKeys[i].value
     }
     fmt.Printf("input dict length: %v\n", len(keys));
     round := len(keys)

@@ -6,8 +6,7 @@ Darts can be used as simple hash dictionary. You can also do very fast Common Pr
 
 Reference
 ---------
-[What is Trie](http://en.wikipedia.org/wiki/Trie)
-
+[What is Trie](http://en.wikipedia.org/wiki/Trie)   
 [An Implementation of Double-Array Trie](http://linux.thai.net/~thep/datrie/datrie.html)
 
 TO DO list

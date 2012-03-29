@@ -29,7 +29,7 @@ Key\tFreq
 Each key occupies one line. The file should be utf-8 encoded
 
 #Code example (unicode version)
-```sh
+```go
 package main
 
 import (
@@ -47,7 +47,7 @@ func main() {
 }
 ```
 #Code example (byte version)
-```sh
+```go
 package main
 
 import (

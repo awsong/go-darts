@@ -46,6 +46,7 @@ type dartsBuild struct {
     err          int
 }
 
+// variable key should be sorted ascendingly
 func Build(key [][]rune /*Key_type*/, freq []int) Darts {
     var d = new(dartsBuild)
 

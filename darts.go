@@ -297,14 +297,17 @@ func (d Darts) CommonPrefixSearch(key []rune /*Key_type*/, nodePos int) (results
     }
     return results
 }
-func Load(filename string) Darts {
+func Load(filename string) (Darts, error) {
     var dict Darts
-    file, _ := os.Open(filename)
+    file, err := os.Open(filename)
+    if err != nil{
+	return Darts{}, err
+    }
     defer file.Close()
 
     dec := gob.NewDecoder(file)
     dec.Decode(&dict)
-    return dict
+    return dict, nil
 }
 
 type dartsKey struct {
@@ -342,10 +345,16 @@ func (r dartsKeySlice) Swap(i, j int) {
     r[i], r[j] = r[j], r[i]
 }
 
-func Import(inFile, outFile string) (bool, Darts) {
-    unifile, _ := os.Open(inFile)
+func Import(inFile, outFile string) (Darts, error) {
+    unifile, erri := os.Open(inFile)
+    if erri != nil{
+	return Darts{}, erri
+    }
     defer unifile.Close()
-    ofile, _ := os.Create(outFile)
+    ofile, erro := os.Create(outFile)
+    if erro != nil{
+	return Darts{}, erro
+    }
     defer ofile.Close()
 
     dartsKeys := make(dartsKeySlice, 0, 130000)
@@ -375,13 +384,13 @@ func Import(inFile, outFile string) (bool, Darts) {
     t := time.Now()
     for i := 0; i < round; i++ {
         if true != d.ExactMatchSearch(keys[i], 0) {
-            fmt.Println("wrong", string(keys[i]), i)
-            return false, d
+            err := fmt.Errorf("missing key ", string(keys[i]), i)
+            return d, err
         }
     }
     fmt.Println(time.Since(t))
     enc := gob.NewEncoder(ofile)
     enc.Encode(d)
 
-    return true, d
+    return d, nil
 }

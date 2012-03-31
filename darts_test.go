@@ -6,8 +6,8 @@ import(
 
 
 func TestExactMatchSearch(t *testing.T) {
-    r, _ := Import("darts.txt", "darts.lib")
-    if r != true {
+    _, err := Import("darts.txt", "darts.lib")
+    if err != nil {
 	t.Errorf("Test fail")
     }
 }

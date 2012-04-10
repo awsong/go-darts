@@ -283,6 +283,11 @@ func (d Darts) CommonPrefixSearch(key []rune /*Key_type*/, nodePos int) (results
         }
 
         p = b + int(key[i]) + 1
+	// p could be bigger than the index
+	if p >= len(d.Check) {
+	    return results
+	}
+
         if b == d.Check[p] {
             b = d.Base[p]
         } else {

@@ -8,7 +8,7 @@ import(
 type dawgNode struct{
     parents, children map[rune]*dawgNode
     lastChar rune
-    acceptable bool
+    acceptable, merged, printed bool
     index int
     freq int
 }
@@ -17,7 +17,9 @@ func addSubTree(node *dawgNode, key []rune){
     current := node
     for _, char := range key{
 	current.lastChar = char
-	current.children = make(map[rune]*dawgNode)
+	if current.children == nil{
+	    current.children = make(map[rune]*dawgNode)
+	}
 	newNode := new(dawgNode)
 	current.children[char] = newNode
 	newNode.parents = make(map[rune]*dawgNode)
@@ -34,6 +36,7 @@ func merge(current, start, end *dawgNode){
     // go to the tail of the not-yet-merged path
     c := current
     for c.children != nil{
+	c.merged = true
 	c = c.children[c.lastChar]
     }
     if c == end {
@@ -47,25 +50,48 @@ func merge(current, start, end *dawgNode){
     for char, pc = range c.parents{
     }
     pr, found := r.parents[char]
-    for found == true{
+    for found == true && pr.merged == true && pc != current && pc.merged == false{
 	c, r = pc, pr
 	for char, pc = range c.parents{
 	}
 	pr, found = r.parents[char]
+	if r == current {
+	    fmt.Println("Oooooops, hoho")
+	}
+    }
+    r.parents[char] = pc
+    if char < 0 { //means pc is acceptable
+	if pc.acceptable == false {
+	    fmt.Println("wrong condition")
+	}
+	char = -char
     }
     pc.children[char] = r
-    r.parents[char] = pc
-}
-func BuildDAWG(keys [][]rune /*Key_type*/, freq []int) *dawgNode{
-    start := new(dawgNode)
     /*
-    end := new(dawgNode)
-    end.acceptable = true
-    end.parents = make(map[rune]*dawgNode)
+    if r == start{
+	fmt.Printf("start:%p, current:%p, end:%p\n", start, current, end)
+	m := start
+	fmt.Printf("%p\n", m)
+	for m.children != nil{
+	    fmt.Printf("%d ", m.lastChar)
+	    m = m.children[m.lastChar]
+	    fmt.Printf("%p\n", m)
+	}
+	fmt.Printf("%v\n", end.parents)
+    }
     */
-    var end *dawgNode
+
+    //tag merged flag
+    m := current.children[current.lastChar]
+    for m != nil {
+	m.merged = true
+	m = m.children[m.lastChar]
+    }
+}
+func buildDAWG(keys [][]rune /*Key_type*/, freq []int) *dawgNode{
     first := true
-    //end.index = -1
+    start := new(dawgNode)
+    var end *dawgNode
 
 f0: for _, key := range keys{
 	current := start
@@ -79,7 +105,7 @@ f0: for _, key := range keys{
 	    if alphabet > current.lastChar{
 		if first {
 		    first = false
-		    end := current
+		    end = current
 		    for end.children != nil{
 			end = end.children[end.lastChar]
 		    }
@@ -104,6 +130,10 @@ f0: for _, key := range keys{
 }
 
 func printDAWG(d *dawgNode){
+    if d.printed {
+	return
+    }
+    d.printed = true
     fmt.Printf("This: %p, acceptable:%t\n", d, d.acceptable)
     for i, p := range d.parents{
 	fmt.Printf("Parent %d: %p\n", i, p)
@@ -116,7 +146,8 @@ func printDAWG(d *dawgNode){
     }
 }
 func BuildFromDAWG(keys [][]rune /*Key_type*/, freq []int) Darts {
-    dawg := BuildDAWG(keys, freq)
+    dawg := buildDAWG(keys, freq)
+    //fmt.Println(dawg.children[19968].children[21051])
 
     //printDAWG(dawg)
     var d = new(dartsBuild)
@@ -133,6 +164,7 @@ func BuildFromDAWG(keys [][]rune /*Key_type*/, freq []int) Darts {
     if d.err < 0 {
         panic("Build error")
     }
+    //fmt.Println(dawg.children[19968].children[25163].children[36974].children[22825])
     return d.darts
 }
 
@@ -165,7 +197,7 @@ func (d *dartsBuild) fetchDAWG(parent *dawgNode) PairList {
 	if nil == parent.children{
 	    parent.children = make(map[rune]*dawgNode)
 	}
-	parent.children[-1] = newNode
+	parent.children[-1] = newNode //tricky, to make -1 0 in func sortMapByValue (k+1)
     }
     return sortMapByValue(parent.children)
 }

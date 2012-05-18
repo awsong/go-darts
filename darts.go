@@ -383,13 +383,14 @@ func Import(inFile, outFile string) (Darts, error) {
     }
     fmt.Printf("input dict length: %v\n", len(keys))
     round := len(keys)
-    d := Build(keys[:round], values[:round])
+    //d := Build(keys[:round], values[:round])
+    d := BuildFromDAWG(keys[:round], values[:round])
     d.UpdateThesaurus(keys[:round])
     fmt.Printf("build out length %v\n", len(d.Base))
     t := time.Now()
     for i := 0; i < round; i++ {
         if true != d.ExactMatchSearch(keys[i], 0) {
-            err := fmt.Errorf("missing key ", string(keys[i]), i)
+            err := fmt.Errorf("missing key %s, %v, %d, %v, %v", string(keys[i]), keys[i], i, keys[i-1], keys[i+1])
             return d, err
         }
     }

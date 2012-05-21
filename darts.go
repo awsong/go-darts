@@ -350,7 +350,7 @@ func (r dartsKeySlice) Swap(i, j int) {
     r[i], r[j] = r[j], r[i]
 }
 
-func Import(inFile, outFile string) (Darts, error) {
+func Import(inFile, outFile string, useDAWG bool) (Darts, error) {
     unifile, erri := os.Open(inFile)
     if erri != nil{
 	return Darts{}, erri
@@ -383,8 +383,12 @@ func Import(inFile, outFile string) (Darts, error) {
     }
     fmt.Printf("input dict length: %v\n", len(keys))
     round := len(keys)
-    //d := Build(keys[:round], values[:round])
-    d := BuildFromDAWG(keys[:round], values[:round])
+    var d Darts
+    if useDAWG {
+	d = BuildFromDAWG(keys[:round], values[:round])
+    }else{
+	d = Build(keys[:round], values[:round])
+    }
     d.UpdateThesaurus(keys[:round])
     fmt.Printf("build out length %v\n", len(d.Base))
     t := time.Now()

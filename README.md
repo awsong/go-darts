@@ -9,6 +9,10 @@ Reference
 [What is Trie](http://en.wikipedia.org/wiki/Trie)   
 [An Implementation of Double-Array Trie](http://linux.thai.net/~thep/datrie/datrie.html)
 
+NEWS
+----------
+* Support building Double-Array from DAWG, reduce the on-disk dict half as Trie. Lookup performance increases 25%.
+
 TO DO list
 ----------
 * Documentation/comments

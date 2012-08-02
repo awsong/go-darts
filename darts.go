@@ -283,10 +283,10 @@ func (d Darts) CommonPrefixSearch(key []rune /*Key_type*/, nodePos int) (results
         }
 
         p = b + int(key[i]) + 1
-	// p could be bigger than the index
-	if p >= len(d.Check) {
-	    return results
-	}
+        // p could be bigger than the index
+        if p >= len(d.Check) {
+            return results
+        }
 
         if b == d.Check[p] {
             b = d.Base[p]
@@ -305,8 +305,8 @@ func (d Darts) CommonPrefixSearch(key []rune /*Key_type*/, nodePos int) (results
 func Load(filename string) (Darts, error) {
     var dict Darts
     file, err := os.Open(filename)
-    if err != nil{
-	return Darts{}, err
+    if err != nil {
+        return Darts{}, err
     }
     defer file.Close()
 
@@ -352,13 +352,13 @@ func (r dartsKeySlice) Swap(i, j int) {
 
 func Import(inFile, outFile string, useDAWG bool) (Darts, error) {
     unifile, erri := os.Open(inFile)
-    if erri != nil{
-	return Darts{}, erri
+    if erri != nil {
+        return Darts{}, erri
     }
     defer unifile.Close()
     ofile, erro := os.Create(outFile)
-    if erro != nil{
-	return Darts{}, erro
+    if erro != nil {
+        return Darts{}, erro
     }
     defer ofile.Close()
 
@@ -385,9 +385,9 @@ func Import(inFile, outFile string, useDAWG bool) (Darts, error) {
     round := len(keys)
     var d Darts
     if useDAWG {
-	d = BuildFromDAWG(keys[:round], values[:round])
-    }else{
-	d = Build(keys[:round], values[:round])
+        d = BuildFromDAWG(keys[:round], values[:round])
+    } else {
+        d = Build(keys[:round], values[:round])
     }
     d.UpdateThesaurus(keys[:round])
     fmt.Printf("build out length %v\n", len(d.Base))

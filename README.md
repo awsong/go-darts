@@ -22,6 +22,7 @@ Switch from unicode to byte version
 ----------------------
 ```sh
 gofmt -tabs=false -tabwidth=4 -r='rune /*Key_type*/ -> byte /*Key_type*/' -w darts.go
+gofmt -tabs=false -tabwidth=4 -r='rune /*Key_type*/ -> byte /*Key_type*/' -w dawg.go
 ```
 
 Usage

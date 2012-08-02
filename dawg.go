@@ -1,148 +1,149 @@
 package darts
 
-import(
-    "sort"
+import (
     "fmt"
-    )
+    "sort"
+)
 
-type dawgNode struct{
-    parents, children map[rune]*dawgNode
-    lastChar rune
+type dawgNode struct {
+    parents, children           map[rune]*dawgNode
+    lastChar                    rune
     acceptable, merged, printed bool
-    index int
-    freq int
+    index                       int
+    freq                        int
 }
 
-func addSubTree(node *dawgNode, key []rune){
+func addSubTree(node *dawgNode, key []rune) {
     current := node
-    for _, char := range key{
-	current.lastChar = char
-	if current.children == nil{
-	    current.children = make(map[rune]*dawgNode)
-	}
-	newNode := new(dawgNode)
-	current.children[char] = newNode
-	newNode.parents = make(map[rune]*dawgNode)
-	if current.acceptable {
-	    newNode.parents[-char] = current
-	}else{
-	    newNode.parents[char] = current
-	}
-	current = newNode
+    for _, char := range key {
+        current.lastChar = char
+        if current.children == nil {
+            current.children = make(map[rune]*dawgNode)
+        }
+        newNode := new(dawgNode)
+        current.children[char] = newNode
+        newNode.parents = make(map[rune]*dawgNode)
+        if current.acceptable {
+            newNode.parents[-char] = current
+        } else {
+            newNode.parents[char] = current
+        }
+        current = newNode
     }
     current.acceptable = true
 }
-func merge(current, start, end *dawgNode){
+func merge(current, start, end *dawgNode) {
     // go to the tail of the not-yet-merged path
     c := current
-    for c.children != nil{
-	c.merged = true
-	c = c.children[c.lastChar]
+    for c.children != nil {
+        c.merged = true
+        c = c.children[c.lastChar]
     }
     if c == end {
-	return
+        return
     }
 
     r := end
     var char rune
     var pc *dawgNode
     // each node on the not-yet-merged path has only one parent
-    for char, pc = range c.parents{
+    for char, pc = range c.parents {
     }
     pr, found := r.parents[char]
-    for found == true && pr.merged == true && pc != current && pc.merged == false{
-	c, r = pc, pr
-	for char, pc = range c.parents{
-	}
-	pr, found = r.parents[char]
-	if r == current {
-	    fmt.Println("Oooooops, hoho")
-	}
+    for found == true && pr.merged == true && pc != current && pc.merged == false {
+        c, r = pc, pr
+        for char, pc = range c.parents {
+        }
+        pr, found = r.parents[char]
+        if r == current {
+            fmt.Println("Oooooops, hoho")
+        }
     }
     r.parents[char] = pc
     if char < 0 { //means pc is acceptable
-	if pc.acceptable == false {
-	    fmt.Println("wrong condition")
-	}
-	char = -char
+        if pc.acceptable == false {
+            fmt.Println("wrong condition")
+        }
+        char = -char
     }
     pc.children[char] = r
     /*
-    if r == start{
-	fmt.Printf("start:%p, current:%p, end:%p\n", start, current, end)
-	m := start
-	fmt.Printf("%p\n", m)
-	for m.children != nil{
-	    fmt.Printf("%d ", m.lastChar)
-	    m = m.children[m.lastChar]
-	    fmt.Printf("%p\n", m)
-	}
-	fmt.Printf("%v\n", end.parents)
-    }
+           if r == start{
+       	fmt.Printf("start:%p, current:%p, end:%p\n", start, current, end)
+       	m := start
+       	fmt.Printf("%p\n", m)
+       	for m.children != nil{
+       	    fmt.Printf("%d ", m.lastChar)
+       	    m = m.children[m.lastChar]
+       	    fmt.Printf("%p\n", m)
+       	}
+       	fmt.Printf("%v\n", end.parents)
+           }
     */
 
     //tag merged flag
     m := current.children[current.lastChar]
     for m != nil {
-	m.merged = true
-	m = m.children[m.lastChar]
+        m.merged = true
+        m = m.children[m.lastChar]
     }
 }
-func buildDAWG(keys [][]rune /*Key_type*/, freq []int) *dawgNode{
+func buildDAWG(keys [][]rune /*Key_type*/, freq []int) *dawgNode {
     first := true
     start := new(dawgNode)
     var end *dawgNode
 
-f0: for _, key := range keys{
-	current := start
-	for j, alphabet := range key{
-	    if current.children == nil{
-		// if we are here, means key is a super string of the previous one
-		// like previous: abcd, key: abcdef
-		addSubTree(current, key[j:])
-		continue f0
-	    }
-	    if alphabet > current.lastChar{
-		if first {
-		    first = false
-		    end = current
-		    for end.children != nil{
-			end = end.children[end.lastChar]
-		    }
-		}
-		// order is important, merge() must be called before addSubTree()
-		merge(current, start, end)
-		addSubTree(current, key[j:])
-		continue f0
-	    }
-	    current = current.children[current.lastChar]
-	}
+f0:
+    for _, key := range keys {
+        current := start
+        for j, alphabet := range key {
+            if current.children == nil {
+                // if we are here, means key is a super string of the previous one
+                // like previous: abcd, key: abcdef
+                addSubTree(current, key[j:])
+                continue f0
+            }
+            if alphabet > current.lastChar {
+                if first {
+                    first = false
+                    end = current
+                    for end.children != nil {
+                        end = end.children[end.lastChar]
+                    }
+                }
+                // order is important, merge() must be called before addSubTree()
+                merge(current, start, end)
+                addSubTree(current, key[j:])
+                continue f0
+            }
+            current = current.children[current.lastChar]
+        }
     }
     if first {
-	first = false
-	end = start
-	for end.children != nil{
-	    end = end.children[end.lastChar]
-	}
+        first = false
+        end = start
+        for end.children != nil {
+            end = end.children[end.lastChar]
+        }
     }
     merge(start, start, end)
     return start
 }
 
-func printDAWG(d *dawgNode){
+func printDAWG(d *dawgNode) {
     if d.printed {
-	return
+        return
     }
     d.printed = true
     fmt.Printf("This: %p, acceptable:%t\n", d, d.acceptable)
-    for i, p := range d.parents{
-	fmt.Printf("Parent %d: %p\n", i, p)
+    for i, p := range d.parents {
+        fmt.Printf("Parent %d: %p\n", i, p)
     }
-    for i, p := range d.children{
-	fmt.Printf("Child %d: %p\n", i, p)
+    for i, p := range d.children {
+        fmt.Printf("Child %d: %p\n", i, p)
     }
-    for _, p := range d.children{
-	printDAWG(p)
+    for _, p := range d.children {
+        printDAWG(p)
     }
 }
 func BuildFromDAWG(keys [][]rune /*Key_type*/, freq []int) Darts {
@@ -169,35 +170,36 @@ func BuildFromDAWG(keys [][]rune /*Key_type*/, freq []int) Darts {
 }
 
 type Pair struct {
-  Char rune
-  node *dawgNode
+    Char rune
+    node *dawgNode
 }
 
 // A slice of Pairs that implements sort.Interface to sort by Value.
 type PairList []Pair
-func (p PairList) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
-func (p PairList) Len() int { return len(p) }
+
+func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p PairList) Len() int           { return len(p) }
 func (p PairList) Less(i, j int) bool { return p[i].Char < p[j].Char }
 
 // A function to turn a map into a PairList, then sort and return it. 
 func sortMapByValue(m map[rune]*dawgNode) PairList {
-   p := make(PairList, len(m))
-   i := 0
-   for k, v := range m {
-      p[i] = Pair{k+1, v}
-      i++
-   }
-   sort.Sort(p)
-   return p
+    p := make(PairList, len(m))
+    i := 0
+    for k, v := range m {
+        p[i] = Pair{k + 1, v}
+        i++
+    }
+    sort.Sort(p)
+    return p
 }
 
 func (d *dartsBuild) fetchDAWG(parent *dawgNode) PairList {
     if parent.acceptable {
-	newNode := new(dawgNode)
-	if nil == parent.children{
-	    parent.children = make(map[rune]*dawgNode)
-	}
-	parent.children[-1] = newNode //tricky, to make -1 0 in func sortMapByValue (k+1)
+        newNode := new(dawgNode)
+        if nil == parent.children {
+            parent.children = make(map[rune]*dawgNode)
+        }
+        parent.children[-1] = newNode //tricky, to make -1 0 in func sortMapByValue (k+1)
     }
     return sortMapByValue(parent.children)
 }
@@ -263,21 +265,21 @@ func (d *dartsBuild) insertDAWG(siblings PairList) int {
     }
 
     for i := 0; i < len(siblings); i++ {
-	if siblings[i].node.index > 0 { // siblings[i] is is already visited
+        if siblings[i].node.index > 0 { // siblings[i] is is already visited
             d.darts.Base[begin+int(siblings[i].Char)] = siblings[i].node.index
-	}else{ // siblings[i] is a new node
-	    newSiblings := d.fetchDAWG(siblings[i].node)
-	    if len(newSiblings) == 0 {
-		var value Value
-		value.Freq = 1
-		d.darts.Base[begin+int(siblings[i].Char)] = -len(d.darts.ValuePool) - 1
-		d.darts.ValuePool = append(d.darts.ValuePool, value)
-	    } else {
-		h := d.insertDAWG(newSiblings)
-		siblings[i].node.index = h
-		d.darts.Base[begin+int(siblings[i].Char)] = h
-	    }
-	}
+        } else { // siblings[i] is a new node
+            newSiblings := d.fetchDAWG(siblings[i].node)
+            if len(newSiblings) == 0 {
+                var value Value
+                value.Freq = 1
+                d.darts.Base[begin+int(siblings[i].Char)] = -len(d.darts.ValuePool) - 1
+                d.darts.ValuePool = append(d.darts.ValuePool, value)
+            } else {
+                h := d.insertDAWG(newSiblings)
+                siblings[i].node.index = h
+                d.darts.Base[begin+int(siblings[i].Char)] = h
+            }
+        }
     }
 
     return begin

@@ -30,13 +30,13 @@ func TestPerf(t *testing.T) {
     line, _, bufErr := uniLineReader.ReadLine()
     for nil == bufErr {
         rst := strings.Split(string(line), "\t")
-        key := []rune(rst[0])
+        key := []rune /*Key_type*/(rst[0])
         value, _ := strconv.Atoi(rst[1])
         dartsKeys = append(dartsKeys, dartsKey{key, value})
         line, _, bufErr = uniLineReader.ReadLine()
     }
 
-    keys := make([][]rune, len(dartsKeys))
+    keys := make([][]rune /*Key_type*/, len(dartsKeys))
 
     for i := 0; i < len(dartsKeys); i++ {
         keys[i] = dartsKeys[i].key

@@ -6,23 +6,23 @@ import (
 )
 
 type dawgNode struct {
-    parents, children           map[rune]*dawgNode
-    lastChar                    rune
+    parents, children           map[rune] /*Key_type*/ *dawgNode
+    lastChar                    rune /*Key_type*/
     acceptable, merged, printed bool
     index                       int
     freq                        int
 }
 
-func addSubTree(node *dawgNode, key []rune) {
+func addSubTree(node *dawgNode, key []rune /*Key_type*/) {
     current := node
     for _, char := range key {
         current.lastChar = char
         if current.children == nil {
-            current.children = make(map[rune]*dawgNode)
+            current.children = make(map[rune] /*Key_type*/ *dawgNode)
         }
         newNode := new(dawgNode)
         current.children[char] = newNode
-        newNode.parents = make(map[rune]*dawgNode)
+        newNode.parents = make(map[rune] /*Key_type*/ *dawgNode)
         if current.acceptable {
             newNode.parents[-char] = current
         } else {
@@ -44,7 +44,7 @@ func merge(current, start, end *dawgNode) {
     }
 
     r := end
-    var char rune
+    var char rune /*Key_type*/
     var pc *dawgNode
     // each node on the not-yet-merged path has only one parent
     for char, pc = range c.parents {
@@ -170,7 +170,7 @@ func BuildFromDAWG(keys [][]rune /*Key_type*/, freq []int) Darts {
 }
 
 type Pair struct {
-    Char rune
+    Char rune /*Key_type*/
     node *dawgNode
 }
 
@@ -182,7 +182,7 @@ func (p PairList) Len() int           { return len(p) }
 func (p PairList) Less(i, j int) bool { return p[i].Char < p[j].Char }
 
 // A function to turn a map into a PairList, then sort and return it. 
-func sortMapByValue(m map[rune]*dawgNode) PairList {
+func sortMapByValue(m map[rune] /*Key_type*/ *dawgNode) PairList {
     p := make(PairList, len(m))
     i := 0
     for k, v := range m {
@@ -197,9 +197,12 @@ func (d *dartsBuild) fetchDAWG(parent *dawgNode) PairList {
     if parent.acceptable {
         newNode := new(dawgNode)
         if nil == parent.children {
-            parent.children = make(map[rune]*dawgNode)
+            parent.children = make(map[rune] /*Key_type*/ *dawgNode)
         }
-        parent.children[-1] = newNode //tricky, to make -1 0 in func sortMapByValue (k+1)
+
+	//tricky, to make -1(or 255 in byte version) 0 in func sortMapByValue (k+1)
+        var t rune = /*Key_type*/ 0
+        parent.children[t-1] = newNode
     }
     return sortMapByValue(parent.children)
 }

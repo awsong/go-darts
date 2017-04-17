@@ -27,13 +27,13 @@ gofmt -tabs=false -tabwidth=4 -r='rune /*Key_type*/ -> byte /*Key_type*/' -w daw
 
 Usage
 ---------
-#Input Dictionary Format
+# Input Dictionary Format
 ```sh
 Key\tFreq
 ```
 Each key occupies one line. The file should be utf-8 encoded
 
-#Code example (unicode version)
+# Code example (unicode version)
 ```go
 package main
 
@@ -51,7 +51,7 @@ func main() {
     }
 }
 ```
-#Code example (byte version)
+# Code example (byte version)
 ```go
 package main
 

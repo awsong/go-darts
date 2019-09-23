@@ -43,7 +43,7 @@ import (
 )
 
 func main() {
-    d, err:= darts.Import("darts.txt", "darts.lib")
+    d, err:= darts.Import("darts.txt", "darts.lib", true)
     if err == nil {
         if d.ExactMatchSearch([]rune("考察队员", 0)) {
             fmt.Println("考察队员 is in dictionary")
@@ -61,7 +61,7 @@ import (
 )
 
 func main() {
-    d, err := darts.Import("darts.txt", "darts.lib")
+    d, err := darts.Import("darts.txt", "darts.lib", true)
     if err == nil {
         key := []byte("考察队员")
         r := d.CommonPrefixSearch(key, 0)

@@ -11,7 +11,7 @@ Reference
 
 NEWS
 ----------
-* Support building Double-Array from DAWG, reduce the on-disk dict half as Trie. Lookup performance increases 25%.
+* Support building Double-Array from [DAWG有向无环图](https://en.wikipedia.org/wiki/Deterministic_acyclic_finite_state_automaton), reduce the on-disk dict half as Trie. Lookup performance increases 25%.
 
 TO DO list
 ----------
